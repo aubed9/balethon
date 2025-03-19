@@ -10,7 +10,7 @@ import requests
 import time
 
 client_hf = C("rayesh/process_miniapp")
-bot = Client("640108494:Y4Hr2wDc8hdMjMUZPJ5DqL7j8GfSwJIETGpwMH12")
+bot = Client("1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz")
 
 
 
