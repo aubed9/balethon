@@ -149,7 +149,7 @@ async def handle_document(message):
     user_id = message.author.id
     if message.video.duration <= 300:
         if user_states[user_id][0] == 'awaiting_document':
-            downloading = await message.reply("ویدئو آپلود شد. لطفا برای ادامه فرایند به مینی اپ مراجعه کنید")
+            downloading = await message.reply("ویدئو آپلود شد. لطفا چند لحظه صبر کنید")
             time.sleep(10)
             try:
                 file = await bot.get_file(message.video.id)
