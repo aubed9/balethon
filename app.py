@@ -93,7 +93,7 @@ async def answer_message(message):
 # Handle inline keyboard selections
 @bot.on_callback_query()
 async def handle_callbacks(callback_query):
-    user_id = await callback_query.author.id
+    user_id = callback_query.author.id
     if user_id not in user_states:
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
@@ -147,11 +147,19 @@ async def handle_callbacks(callback_query):
 
 @bot.on_message(video)
 async def handle_document(message):
-    user_id = await message.author.id
+    user_id = message.author.id
+    
+    # 1. Verify user exists in state tracking
+    if user_id not in user_states:
+        await message.reply("❌ لطفا ابتدا از /start استفاده کنید!")
+        await init_state(user_id, ['awaiting_choose'])  # Force initialize
+        return
+    
+    # 2. Secure state check
     if message.video.duration <= 300:
-        if user_states[user_id][0] == 'awaiting_document':
+        if user_states.get(user_id, [None])[0] == 'awaiting_document':  # Safe access
             downloading = await message.reply("ویدئو آپلود شد. لطفا چند لحظه صبر کنید")
-            time.sleep(10)
+            
             try:
                 file = await bot.get_file(message.video.id)
                 file_path = file.path
@@ -187,7 +195,6 @@ async def handle_document(message):
                         text="برای ادامه، یک گزینه را انتخاب کنید:",
                         reply_markup=InlineKeyboard(
                             [("تولید زیرنویس 📜 ", "sub")],
-                            [("دوبله فارسی 🎬 ", "dub")]
                         )
                     )
                 finally:
@@ -195,13 +202,18 @@ async def handle_document(message):
                     progress_task.cancel()
             except Exception as e:
                 await downloading.edit_text(f"❌ خطا در پردازش: {str(e)}")
-                await handle_state(user_id ,  'awaiting_choose')
+                
+                # 3. Handle missing state in error recovery
+                if user_id not in user_states:
+                    await init_state(user_id, ['awaiting_choose'])
+                else:
+                    await handle_state(user_id, 'awaiting_choose')
+                
                 await bot.send_message(
                     chat_id=message.chat.id,
                     text="برای ادامه، یک گزینه را انتخاب کنید:",
                     reply_markup=InlineKeyboard(
                         [("تولید زیرنویس 📜 ", "sub")],
-                        [("دوبله فارسی 🎬 ", "dub")]
                     )
                 )
     else:
