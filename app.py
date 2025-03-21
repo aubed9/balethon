@@ -92,7 +92,7 @@ async def answer_message(message):
 # Handle inline keyboard selections
 @bot.on_callback_query()
 async def handle_callbacks(callback_query):
-    user_id = callback_query.author.id
+    user_id = await callback_query.author.id
     if user_id not in user_states:
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
@@ -146,7 +146,7 @@ async def handle_callbacks(callback_query):
 
 @bot.on_message(video)
 async def handle_document(message):
-    user_id = message.author.id
+    user_id = await message.author.id
     if message.video.duration <= 300:
         if user_states[user_id][0] == 'awaiting_document':
             downloading = await message.reply("ویدئو آپلود شد. لطفا چند لحظه صبر کنید")
