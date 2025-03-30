@@ -9,8 +9,8 @@ import asyncio
 import requests
 import aiohttp
 
-#client_hf = C("rayesh/process_miniapp")
-bot = Client("640108494:Y4Hr2wDc8hdMjMUZPJ5DqL7j8GfSwJIETGpwMH12")
+client_hf = C("rayesh/process_miniapp")
+bot = Client("1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz")
 
 
 user_states = {}
