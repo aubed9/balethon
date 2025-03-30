@@ -239,36 +239,28 @@ async def handle_document(message):
                     file_path = file.path
                     video_url = f"https://tapi.bale.ai/file/640108494:Y4Hr2wDc8hdMjMUZPJ5DqL7j8GfSwJIETGpwMH12/{file_path}"
                     
-                      job = client_hf.submit(
+                     job = client_hf.submit(
                      url=f"https://tapi.bale.ai/file/bot1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz/{file_path}",
                      clip_type=user_states[user_id][1],
                      parameters=user_parametrs_dub,
                      api_name="/main",
-                 ) 
-                 file = await bot.get_file(message.video.id)
-                 file_path = file.path
-                 job = client_hf.submit(
-                     url=f"https://tapi.bale.ai/file/bot1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz/{file_path}",
-                     clip_type=user_states[user_id][1],
-                     parameters=f"{user_parametrs_sub[user_id][0]},{user_parametrs_sub[user_id][1]}",
-                     api_name="/main",
-                 )
-                 print(job.status())
-                 final_video = None
-                 for update in job:
-                     progress_msg, video_output = update
-                     if progress_msg:
-                         await downloading.edit_text(f"وضعیت: {progress_msg}")
-                     if video_output is not None:
-                         final_video = video_output
-                 print(final_video)
-                 if final_video:
-                     await bot.send_video(
+                     )
+                     print(job.status())
+                     final_video = None
+                     for update in job:
+                         progress_msg, video_output = update
+                         if progress_msg:
+                             await downloading.edit_text(f"وضعیت: {progress_msg}")
+                         if video_output is not None:
+                             final_video = video_output
+                     print(final_video)
+                     if final_video:
+                         await bot.send_video(
                          chat_id=message.chat.id,
                          video=final_video["video"],
                          caption="🎭 شهر فرنگه، از همه رنگه!✨ پردازش ویدیوی شما تموم شد! ✨"
                      )
-                     user_states[user_id][0] = 'awaiting_choose'
+                         user_states[user_id][0] = 'awaiting_choose'
                  await bot.send_message(
                      chat_id=message.chat.id,
                      text="برای ادامه، یک گزینه را انتخاب کنید:",
