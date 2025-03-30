@@ -5,6 +5,7 @@ from gradio_client import Client as C
 import asyncio
 import aiohttp
 
+
 client_hf = C("rayesh/process_miniapp")
 bot = Client("1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz")
 
