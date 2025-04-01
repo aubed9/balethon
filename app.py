@@ -268,7 +268,7 @@ async def handle_document(message):
                     [("تولید زیرنویس 📜 ", "sub")]
                     )
                 )
-                reply_markup=home_keyboard
+                    reply_markup=home_keyboard
                 except Exception as e:
                     await downloading.edit_text(f"❌ خطا در پردازش: {str(e)}")
                     user_states[user_id][0] = 'awaiting_choose'
