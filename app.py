@@ -202,7 +202,7 @@ async def handle_document(message):
                     await handle_state(user_id, 'awaiting_choose')
 
 
-except Exception as e:
+            except Exception as e:
                 print(f"General Error: {str(e)}")
                 await downloading.edit_text("❌ خطای پردازش ویدئو")
                 await handle_state(user_id, 'awaiting_choose')
