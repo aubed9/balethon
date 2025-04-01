@@ -259,16 +259,15 @@ async def handle_document(message):
                         chat_id=message.chat.id,
                         video=final_video["video"],
                         caption="🎭 شهر فرنگه، از همه رنگه!✨ پردازش ویدیوی شما تموم شد! ✨"
-                     )
-                        user_states[user_id][0] = 'awaiting_choose'
-                     await bot.send_message(
-                     chat_id=message.chat.id,
-                     text="برای ادامه، یک گزینه را انتخاب کنید:",
-                     reply_markup=InlineKeyboard(
-                     [("تولید زیرنویس 📜 ", "sub")]
-                   
-                 )
-             )
+                    )
+                    user_states[user_id][0] = 'awaiting_choose'
+                    await bot.send_message(
+                    chat_id=message.chat.id,
+                    text="برای ادامه، یک گزینه را انتخاب کنید:",
+                    reply_markup=InlineKeyboard(
+                    [("تولید زیرنویس 📜 ", "sub")]
+                    )
+                )
                 reply_markup=home_keyboard
                 except Exception as e:
                 await downloading.edit_text(f"❌ خطا در پردازش: {str(e)}")
@@ -276,3 +275,4 @@ async def handle_document(message):
 
 bot.run()
     
+
