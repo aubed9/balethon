@@ -4,18 +4,16 @@ from balethon.objects import InlineKeyboard, ReplyKeyboard
 from gradio_client import Client as C
 from gradio_client import handle_file
 import json
-import queue
-import asyncio
-import requests
-import aiohttp
 
-#client_hf = C("rayesh/process_miniapp")
+
+client_hf = C("rayesh/process_miniapp")
 bot = Client("640108494:Y4Hr2wDc8hdMjMUZPJ5DqL7j8GfSwJIETGpwMH12")
 
 
 user_states = {}
 user_parametrs_sub={}
 user_parametrs_dub={}
+
 
 # Define reply keyboards
 home_keyboard = ReplyKeyboard(["خانه"])
@@ -35,9 +33,9 @@ async def answer_message(message):
         print(user_states[user_id][0]+"1\n")
         await message.reply (
             """🎉 یه خبر خفن برای تولیدکننده‌های محتوا!
-دیگه نگران ترجمه و دوبله ویدیوهای انگلیسی نباشید! 🎙✨
+دیگه نگران ترجمه و زیرنویس ویدیوهای انگلیسی نباشید! 🎙✨
 ربات "شهر فرنگ" همه کارو براتون انجام می‌ده:
-✅  زیرنویس فارسی سریع و دقیق
+✅  زیرنویس فارسی سریع و دقیق از انگلیسی به فارسی 
 ✅ قابلیت شخصی سازی زیرنویس و ترجمه
 ✅ صرفه‌جویی در زمان و هزینه
 
@@ -61,7 +59,7 @@ async def handle_callbacks(callback_query):
         )
     print('callback_query')
     #print(user_states[user_id][0]+"2\n")
-    if user_states[user_id][0] == 'awaiting_choose':
+    if user_states[user_id][0] == 'awaiting_choose' or 'awaiting_response' :
         print("callback choose")
         if callback_query.data == "toturial":
             await bot.send_message(
@@ -95,7 +93,7 @@ async def handle_callbacks(callback_query):
             text="لطفا یک گزینه را از کیبورد انتخاب کنید.",
             reply_markup=InlineKeyboard(
                     [("تولید زیرنویس سریع ⚡️", "sub_def")],
-                    [("(به زودی)تولید زیرنویس پیشرفته ⚙️", "sub_custome")]
+                    [("(به زودی)تولید زیرنویس پیشرفته ⚙️", "b")]
                     ),
           #  reply_markup=home_keyboard
             )
@@ -213,66 +211,82 @@ async def handle_callbacks(callback_query):
     if user_states[user_id][0] == 'awaiting_document':         
         await bot.send_message(
                 chat_id=callback_query.message.chat.id,
-                text="لطفا ویدیو انگلیسی مورد نظر خود را آپلود کنید"
+                text="""لطفا ویدیو انگلیسی مورد نظر خود را آپلود کنید
+                (ویدیو باید کمتر از 5 دقیقه باشد)"""
         )
 # Handle video uploads
 @bot.on_message(video)
 async def handle_document(message):
     user_id = message.author.id
-    if message.video.duration <= 300:
-        if user_states[user_id][0] == 'awaiting_document': 
-            downloading = await message.reply("در صف پردازش . . . 💡")
+    
+    if user_states[user_id][0] == 'awaiting_document': 
+        downloading = await message.reply("در صف پردازش . . . 💡")
+        try:
+            
+            # Get the file details from the bot using your usual method.
+            file = await bot.get_file(message.video.id)
+            file_path = file.path
+            # Prepare the file URL; adjust it to your token and file path.
+            video_url = f"https://tapi.bale.ai/file/bot1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz/{file_path}",
+            
+            # Send an initial progress message so the user sees something.
+            #mood
+            # Set up your payload; note that you might need to indicate that you want a streaming response.
+
             if user_states[user_id][1]=="dub":
-                pass
-                '''file = await bot.get_file(message.video.id)
+                    
+                file = await bot.get_file(message.video.id)
                 file_path = file.path
                 job = client_hf.submit(
                     url=f"https://tapi.bale.ai/file/bot1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz/{file_path}",
                     clip_type=user_states[user_id][1],
                     parameters=user_parametrs_dub,
                     api_name="/main",
-                )'''
+                )
             elif user_states[user_id][1]=="sub":
                     
-                try:
-                    file = await bot.get_file(message.video.id)
-                    file_path = file.path
-                    video_url = f"https://tapi.bale.ai/file/640108494:Y4Hr2wDc8hdMjMUZPJ5DqL7j8GfSwJIETGpwMH12/{file_path}"
-                    
-                    job = client_hf.submit(
+                file = await bot.get_file(message.video.id)
+                file_path = file.path
+                job = client_hf.submit(
                     url=f"https://tapi.bale.ai/file/bot1261816176:T4jSrvlJiCfdV5UzUkpywN2HFrzef1IZJs5URAkz/{file_path}",
                     clip_type=user_states[user_id][1],
-                    parameters=user_parametrs_dub,
+                    parameters=f"{user_parametrs_sub[user_id][0]},{user_parametrs_sub[user_id][1]}",
                     api_name="/main",
-                    )
-                    print(job.status())
-                    final_video = None
-                    for update in job:
-                        progress_msg, video_output = update
-                        if progress_msg:
-                            await downloading.edit_text(f"وضعیت: {progress_msg}")
-                        if video_output is not None:
-                            final_video = video_output
-                    print(final_video)
-                    if final_video:
-                        await bot.send_video(
-                        chat_id=message.chat.id,
-                        video=final_video["video"],
-                        caption="🎭 شهر فرنگه، از همه رنگه!✨ پردازش ویدیوی شما تموم شد! ✨"
-                    )
-                    user_states[user_id][0] = 'awaiting_choose'
-                    await bot.send_message(
-                    chat_id=message.chat.id,
-                    text="برای ادامه، یک گزینه را انتخاب کنید:",
-                    reply_markup=InlineKeyboard(
-                    [("تولید زیرنویس 📜 ", "sub")]
-                    )
                 )
-                    reply_markup=home_keyboard
-                except Exception as e:
-                    await downloading.edit_text(f"❌ خطا در پردازش: {str(e)}")
-                    user_states[user_id][0] = 'awaiting_choose'
-
+            print(job.status())
+            final_video = None
+            for update in job:
+                progress_msg, video_output = update
+                if progress_msg:
+                    await downloading.edit_text(f"وضعیت: {progress_msg}")
+                if video_output is not None:
+                    final_video = video_output
+            print(final_video)
+            if final_video:
+                await bot.send_video(
+                    chat_id=message.chat.id,
+                    video=final_video["video"],
+                    caption="🎭 شهر فرنگه، از همه رنگه!✨ پردازش ویدیوی شما تموم شد! ✨"
+                )
+                user_states[user_id][0] = 'awaiting_response'
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text="برای ادامه، یک گزینه را انتخاب کنید:",
+                reply_markup=InlineKeyboard(
+                [("تولید زیرنویس 📜 ", "sub")]
+              
+            )
+        )
+            reply_markup=home_keyboard
+        except Exception as e:
+            await downloading.edit_text(f"❌ خطا در پردازش: {str(e)}")
+            user_states[user_id][0] = 'awaiting_choose'
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text="برای ادامه، یک گزینه را انتخاب کنید:",
+             reply_markup=InlineKeyboard(
+                [("تولید زیرنویس 📜 ", "sub")]
+            )
+        )
+            reply_markup=home_keyboard
 bot.run()
-    
-
