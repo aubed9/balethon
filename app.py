@@ -33,6 +33,7 @@ async def handle_sub_paramiters(id, app=""):
     
     user_parametrs_sub[id][0].append(app)
 
+
 # Function to process the Gradio job in a separate thread
 def process_video(job, progress_queue):
     final_video = None
